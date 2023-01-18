@@ -1,5 +1,6 @@
 import numpy as np
 import scipy.io as sio
+from scipy.spatial import distance
 
 
 def singlelinkage(X, k):
@@ -8,7 +9,36 @@ def singlelinkage(X, k):
     :param k: the number of clusters
     :return: a column vector of length m, where C(i) ∈ {1, . . . , k} is the identity of the cluster in which x_i has been assigned.
     """
-    raise NotImplementedError()
+    m, d = X.shape
+    clusters = [[i] for i in range(m)]  # trivial singletons clustering
+    distance_mat = distance.squareform(distance.pdist(X))
+
+    while len(clusters) > k:
+        # Find the closest pair of clusters
+        i, j = np.unravel_index(np.argmin(distance_mat), distance_mat.shape)
+
+        # Merge the two closest clusters
+        clusters[i] = clusters[i] + clusters[j]
+        del clusters[j]
+
+        # Update distance matrix
+        distance_mat[i, j] = np.inf
+        distance_mat[j, :] = np.inf
+        distance_mat[:, j] = np.inf
+        distance_mat[i, i] = np.inf
+
+        for l in range(len(clusters)):
+            if l != i:
+                distance_mat[i, l] = min([distance_mat[x, y] for x in clusters[i] for y in clusters[l]])
+                distance_mat[l, i] = distance_mat[i, l]
+
+    # Assign each point to its final cluster
+    C = np.zeros((m, 1))
+    for i in range(k):
+        for j in clusters[i]:
+            C[j] = i
+
+    return C
 
 
 def simple_test():
