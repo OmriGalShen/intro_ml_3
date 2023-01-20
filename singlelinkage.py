@@ -1,5 +1,4 @@
 import numpy as np
-import scipy.io as sio
 from scipy.spatial import distance
 
 
@@ -10,41 +9,43 @@ def singlelinkage(X, k):
     :return: a column vector of length m, where C(i) ∈ {1, . . . , k} is the identity of the cluster in which x_i has been assigned.
     """
     m, d = X.shape
-    clusters = [[i] for i in range(m)]  # trivial singletons clustering
-    distance_mat = distance.squareform(distance.pdist(X))
+    distance_mat = get_initial_distance_mat(X)
+    # Initialize the clusters as singletons
+    clusters = np.array(range(m))
 
-    while len(clusters) > k:
-        # Find the closest pair of clusters
-        i, j = np.unravel_index(np.argmin(distance_mat), distance_mat.shape)
+    for _ in range(m - k):
+        i, j = get_closest_pair_of_clusters(distance_mat, m)
+        for cluster in range(m):
+            if cluster != i and cluster != j:
+                temp = min(distance_mat[i][cluster], distance_mat[j][cluster])
+                distance_mat[i][cluster] = temp
+                distance_mat[cluster][i] = temp
 
-        # Merge the two closest clusters
-        clusters[i] = clusters[i] + clusters[j]
-        del clusters[j]
-
-        # Update distance matrix
-        distance_mat[i, j] = np.inf
         distance_mat[j, :] = np.inf
         distance_mat[:, j] = np.inf
-        distance_mat[i, i] = np.inf
 
-        for l in range(len(clusters)):
-            if l != i:
-                distance_mat[i, l] = min([distance_mat[x, y] for x in clusters[i] for y in clusters[l]])
-                distance_mat[l, i] = distance_mat[i, l]
+        clusters[clusters == j] = i
 
-    # Assign each point to its final cluster
-    C = np.zeros((m, 1))
-    for i in range(k):
-        for j in clusters[i]:
-            C[j] = i
+    clusters = clusters.reshape(m, 1)
+    return clusters
 
-    return C
+
+def get_initial_distance_mat(X):
+    distance_mat = distance.squareform(distance.pdist(X))
+    np.fill_diagonal(distance_mat, np.inf)
+    return distance_mat
+
+
+def get_closest_pair_of_clusters(distance_mat, m):
+    return np.unravel_index(np.argmin(distance_mat), (m, m))
 
 
 def simple_test():
     # load sample data (this is just an example code, don't forget the other part)
     data = np.load('mnist_all.npz')
-    X = np.concatenate((data['train0'], data['train1']))
+    data0 = data['train0']
+    data1 = data['train1']
+    X = np.concatenate((data0[np.random.choice(data0.shape[0], 30)], data1[np.random.choice(data1.shape[0], 30)]))
     m, d = X.shape
 
     # run single-linkage
