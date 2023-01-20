@@ -61,7 +61,7 @@ def calculate_clustering_error(title, clustering_type, clusters, k, total_size):
 
 def calc_single_cluster(clusters, cluster_index):
     cluster_indexes = np.where(clusters == cluster_index)[0]
-    labels_counts, _ = np.histogram(cluster_indexes // 100, range(11))
+    labels_counts, _ = np.histogram(cluster_indexes // 100, range(10))
     common_label = np.argmax(labels_counts)
 
     cluster_size = np.count_nonzero(clusters == cluster_index)
