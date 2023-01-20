@@ -68,7 +68,7 @@ def calc_single_cluster(clusters, cluster_index):
 
     labels_total_count = sum(labels_counts)
     percentage = labels_counts[common_label] / labels_total_count
-    percentage = f"{percentage:.2f}"
+    percentage = f"{percentage * 100:.2f}%"
 
     print(
         f"cluster={cluster_index}, cluster_size={cluster_size}, common_label={common_label},percentage={percentage}")
