@@ -15,16 +15,7 @@ def singlelinkage(X, k):
 
     for _ in range(m - k):
         i, j = get_closest_pair_of_clusters(distance_mat, m)
-        for cluster in range(m):
-            if cluster != i and cluster != j:
-                temp = min(distance_mat[i][cluster], distance_mat[j][cluster])
-                distance_mat[i][cluster] = temp
-                distance_mat[cluster][i] = temp
-
-        distance_mat[j, :] = np.inf
-        distance_mat[:, j] = np.inf
-
-        clusters[clusters == j] = i
+        update_distance_mat(i, j, distance_mat, clusters)
 
     clusters = clusters.reshape(m, 1)
     return clusters
@@ -38,6 +29,20 @@ def get_initial_distance_mat(X):
 
 def get_closest_pair_of_clusters(distance_mat, m):
     return np.unravel_index(np.argmin(distance_mat), (m, m))
+
+
+def update_distance_mat(i, j, distance_mat, clusters):
+    for cluster in range(len(clusters)):
+        if cluster == i or cluster == j:
+            continue
+        min_distance = min(distance_mat[i][cluster], distance_mat[j][cluster])
+        distance_mat[i][cluster] = min_distance
+        distance_mat[cluster][i] = min_distance
+
+    distance_mat[j, :] = np.inf
+    distance_mat[:, j] = np.inf
+
+    clusters[clusters == j] = i
 
 
 def simple_test():
