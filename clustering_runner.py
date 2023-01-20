@@ -27,8 +27,7 @@ def question_2_d():
     k = 10
     X = get_sample(SINGLELINKAGE_SAMPLE_SIZE)
     clusters = singlelinkage(X, k=k)
-    clusters = np.unique(clusters)
-    for cluster_number, i in enumerate(clusters):
+    for cluster_number, i in enumerate(np.unique(clusters)):
         clusters[clusters == i] = cluster_number
     calculate_clustering_error("Question 2d", "singlelinkage", clusters, k=k, total_size=1000)
 
@@ -42,8 +41,7 @@ def question_2_e():
 
     X = get_sample(SINGLELINKAGE_SAMPLE_SIZE)
     clusters = singlelinkage(X, k=k)
-    clusters = np.unique(clusters)
-    for cluster_number, i in enumerate(clusters):
+    for cluster_number, i in enumerate(np.unique(clusters)):
         clusters[clusters == i] = cluster_number
     calculate_clustering_error("Question 2e - singlelinkage", "singlelinkage", clusters, k=k, total_size=1000)
 
@@ -67,6 +65,7 @@ def calc_single_cluster(clusters, cluster_index):
     common_label = np.argmax(labels_counts)
 
     cluster_size = np.count_nonzero(clusters == cluster_index)
+
     labels_total_count = sum(labels_counts)
     percentage = labels_counts[common_label] / labels_total_count
     percentage = f"{percentage:.2f}"
